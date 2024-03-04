@@ -59,6 +59,11 @@ async def notify_julik(context: ContextTypes.DEFAULT_TYPE):
     notification_text = f"Этот грязный жулик хотел нас наебать и обнулить бота:\n\n {context.user_data['first_name']} (@{context.user_data['username']})\n"
     await context.bot.send_message(chat_id=NOTIFICATION_CHAT_ID, text=notification_text)
 
+async def notify_gift(context: ContextTypes.DEFAULT_TYPE, nik, id):
+    # user = update.message.from_user
+    notification_text = f"Этот пользователь получил подарок:\n\n {nik} id={id})\n"
+    await context.bot.send_message(chat_id=NOTIFICATION_CHAT_ID, text=notification_text)
+
 
 async def notify_no(update: Update, context: ContextTypes.DEFAULT_TYPE, feedback):
     # user = update.message.from_user
@@ -93,7 +98,7 @@ async def notify_referrer(
             )
             await context.bot.send_message(
                 chat_id=referrer_chat_id,
-                text=f"Если у тебя остались вопросы или ты хочешь глубже разобрать сферы своей жизни, то пиши мне в личные сообщения @polinaataroo\n💌\n\nТакже я дарю тебе скидку 20% на любую из моих услуг, промокод -- твой ник телеграм, предложение действует до {calculate_future_date(5)}❤️\n\nНе отписывайся от этого бота, тут будет польза по твоему Аркану ✨",
+                text=f"Если у тебя остались вопросы или ты хочешь глубже разобрать сферы своей жизни, то пиши мне в личные сообщения @polinaataroo\n💌\n\nНе отписывайся от этого бота, тут будет польза по твоему Аркану ✨",
             )
             set_discount_end(referrer_chat_id, calculate_future_date(5))
 

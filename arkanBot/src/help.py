@@ -98,6 +98,7 @@ def parse_date(date_str):
 def generate_pdf_path(arcan, try_, type):
     pdf_directory = "../misk/"
     if type:
+        # print("DIR =" + str(glob(os.path.join(pdf_directory, f"{arcan}_*{type}.pdf"))))
         if pdf_files := glob(os.path.join(pdf_directory, f"{arcan}_*{type}.pdf")):
             try:
                 return pdf_files[try_]

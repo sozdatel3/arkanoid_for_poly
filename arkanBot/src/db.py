@@ -1,3 +1,4 @@
+from pickle import TRUE
 import sqlite3
 import uuid
 
@@ -19,19 +20,23 @@ cursor.execute(
 """
 )
 
-# cursor.execute(
-# "ALTER TABLE users ADD COLUMN already_have_all_files TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN birth_date TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN like TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN discount_end TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN first_meet TEXT DEFAULT NULL")
+cursor.execute(
+"ALTER TABLE users ADD COLUMN already_have_all_files TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN birth_date TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN like TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN discount_end TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN first_meet TEXT DEFAULT NULL")
 cursor.execute("ALTER TABLE users ADD COLUMN file_sent BOOLEAN DEFAULT FALSE;")
 cursor.execute(
     "ALTER TABLE users ADD COLUMN feedback_choice TEXT DEFAULT NULL;")
-# cursor.execute(
-# "ALTER TABLE users ADD COLUMN alredy_recive_one TEXT DEFAULT NULL")
-
+cursor.execute(
+"ALTER TABLE users ADD COLUMN alredy_recive_one TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN march_send BOOLEAN DEFAULT FALSE")
+cursor.execute("ALTER TABLE users ADD COLUMN march_sphere_chosen TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN march_send_all BOOLEAN DEFAULT FALSE")
+cursor.execute("ALTER TABLE users ADD COLUMN no_friend BOOLEAN DEFAULT FALSE")
+conn.commit()
 
 # Создание таблицы для отслеживания переходов по реферальным ссылкам
 cursor.execute(
@@ -45,10 +50,25 @@ cursor.execute(
     )
 """
 )
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS gifts (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        already_take BOLEAN DEFAULT FALSE,
+        gift_date TEXT DEFAULT NULL
+    )
+"""
+)
 
 conn.commit()
 
-
+def db_no_friend(id):
+    cursor.execute(
+        "UPDATE users SET no_friend = ? WHERE user_id = ?", (TRUE, id)
+    )
+    conn.commit()
+    
 def generate_referral_code():
     return str(uuid.uuid4())
 
@@ -74,13 +94,25 @@ def set_birth_date(chat_id, birth_date):
         "UPDATE users SET first_name = ? WHERE chat_id = ?", (
             birth_date, chat_id,)
     )
+    conn.commit()
 
-
+def what_choose_in_march(id):
+    return cursor.execute(
+        "SELECT march_sphere_chosen FROM users WHERE chat_id = ?", (id,)).fetchone()
+    
 def set_already_recive_one(chat_id):
     cursor.execute(
         "UPDATE users SET alredy_recive_one = ? WHERE chat_id = ?", (
             "True", chat_id,)
     )
+    conn.commit()
+    
+def set_already_recive_all_march(chat_id):
+    cursor.execute(
+        "UPDATE users SET march_send_all = ? WHERE chat_id = ?", (
+            "True", chat_id,)
+    )
+    conn.commit()
 
 
 def set_discount_end(chat_id, discount_end):
@@ -88,6 +120,7 @@ def set_discount_end(chat_id, discount_end):
         "UPDATE users SET discount_end = ? WHERE chat_id = ?", (
             discount_end, chat_id,)
     )
+    conn.commit()
 
 
 def check_if_user_received_one_file(user_id):
@@ -103,6 +136,16 @@ def check_if_user_received_one_file(user_id):
     # Возвращаем результат проверки
     return result[0] if result else None
 
+def get_nik(id):
+    # Выполняем запрос для проверки статуса получения всех файлов пользователем
+    cursor.execute(
+        "SELECT username FROM users WHERE user_id = ?", (
+            id,)
+    )
+    result = cursor.fetchone()
+
+    # Возвращаем результат проверки
+    return result[0] if result else None
 
 def check_if_user_received_all_files(user_id):
     cursor = conn.cursor()
