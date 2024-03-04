@@ -1,5 +1,7 @@
+from xmlrpc.client import Boolean
 from telegram.error import TelegramError
 from telegram import Bot
+from march import *
 import asyncio
 import os
 from telegram.ext import (
@@ -15,8 +17,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 from dateparser.search.search import DateSearchWithDetection
 from telegram import InputFile
-
-from db import check_if_user_received_one_file, cursor, conn, set_already_recive_one, set_birth_date
+from march import *
+from db import check_if_user_received_one_file, cursor, conn, set_already_recive_all_march, set_already_recive_one, set_birth_date, what_choose_in_march
 from all_text import (
     hello,
     ask_to_send_friend,
@@ -51,7 +53,7 @@ def second_try_pars(message: str):
     if result == [] or result is None:
         return None
     birth_date = replace_shit_from_string(str(result[0][1]))
-    print(f"BIRTH DATE ={birth_date}")
+    # print(f"BIRTH DATE ={birth_date}")
     return birth_date
 
 
@@ -172,11 +174,11 @@ async def handle_get_stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Функция для обработки нажатия на кнопку
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # await query.edit_message_reply_markup(reply_markup=None)
-
     user = context.user_data["user"]
     query = update.callback_query
     await query.answer()
 
+    # print(f"QDATA={query.data}")
     if query.data == "0":
         context.user_data["choose"] = "Отношения"
     elif query.data == "1":
@@ -282,10 +284,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     chat_id = update.effective_chat.id
     cursor = conn.cursor()
-
+    extra = False
+    referrer_id = None
     # Получаем ID реферера из аргументов команды, если они есть
-    referrer_id = int(context.args[0]) if context.args else None
-
+    # print("TUUUT")
+    # print(context.args[0].split("_"))
+    try:
+        if context.args:
+            params = context.args[0].split('_')
+    
+    # referrer_id = int(context.args[0]) if context.args else None
+            referrer_id = int(params[0]) if context.args else None
+            extra = Boolean(params[1]) if params[1] else None
+        else:
+            referrer_id =  None
+            extra =  None
+            
+    except:
+        pass
+        # params = None
+        # referrer_id = None
     # Проверяем, задан ли username пользователя
     if user.username is not None:
         # Если username задан  ищем пользователя по username или user_id
@@ -297,11 +315,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cursor.execute("SELECT id FROM users WHERE user_id = ?", (user.id,))
 
     user_record = cursor.fetchone()
-
+    # print(f"EXTRA = {extra}")
     if (
         user.username != "polinaataroo"
         and user.username != "willameh"
-        # and user_record is not None
+        and user_record is not None
         and check_if_user_received_one_file(update.effective_user.id)
     ):
         # Пользователь найден в базе данных
@@ -321,7 +339,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         conn.commit()
 
         # Регистрация реферера, если таковой есть
-        if referrer_id:
+        if referrer_id and not extra:
             cursor.execute(
                 "INSERT INTO referrals (referrer_id, referred_id) VALUES (?, ?)",
                 (referrer_id, user_id),
@@ -329,7 +347,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             conn.commit()
             # Отправляем уведомление рефереру
             await notify_referrer(update, context, referrer_id, user.username)
-
+        if extra:
+            set_already_recive_all_march(referrer_id)
+            # send_all_march(update, context, referrer_id)
+            choice_march = what_choose_in_march(int(referrer_id))
+            await send_march_file(update, context, int(referrer_id), choice_march, TRUE)
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=hello_good(user.first_name),
@@ -403,12 +425,14 @@ async def send_file_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("У вас нет прав для выполнения этой операции.")
 
+
 if __name__ == "__main__":
     application = ApplicationBuilder().token(TOKEN).build()
 
     # Обработчик команды /start
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("sendfile", send_file_command))
+    application.add_handler(CommandHandler("sendMarch", march_send))
     application.add_handler(
         MessageHandler(filters.TEXT & (~filters.COMMAND), feedback_handler)
     )
@@ -423,14 +447,21 @@ if __name__ == "__main__":
     # Обработка статистики
     application.add_handler(CommandHandler("getStat", handle_get_stat))
     pattern = "^(1_per_month|2_per_month|3_per_month|never)$"
+    pattern_march = "^(relation|money|work)$"
+    # pattern_for_first_choose = "^(0|1|2)$"
     application.add_handler(CallbackQueryHandler(
         feedback_callback_handler, pattern=pattern))
     application.add_handler(CallbackQueryHandler(handle_yes, pattern="^yes$"))
     application.add_handler(CallbackQueryHandler(handle_no, pattern="^no$"))
+    # application.add_handler(CallbackQueryHandler(button, pattern=pattern_for_first_choose))
+    application.add_handler(CallbackQueryHandler(
+        choose_march_sphere, pattern=pattern_march))
+    application.add_handler(CallbackQueryHandler(
+        no_friend, pattern="^no_friend$"))
+    application.add_handler(CallbackQueryHandler(button))
     application.add_handler(
         CallbackQueryHandler(handle_subscribe, pattern="^subscribe$")
     )
-    application.add_handler(CallbackQueryHandler(button))
     application.run_polling()
 
 
@@ -439,7 +470,9 @@ async def send_arcan(
 ):
     if not type:
         all_pdf = generate_pdf_path(arcan, 0, None)
+        # print(f"SEND_all :{all_pdf}")
         for pdf in all_pdf:
+            # print(f"TRY TO SEND_all :{pdf}")
             with open(pdf, "rb") as pdf_file:
                 new_filename = clean_filename(os.path.basename(pdf))
                 await context.bot.send_document(
@@ -448,9 +481,15 @@ async def send_arcan(
                     caption="",
                 )
     else:
+        # print(f"SEND :{all_pdf}")
         for i in range(3):
+            # print(f"SEND :{pdf_path}")
+            # print(arcan)
+            # print(i)
+            # print(type)
             if pdf_path := generate_pdf_path(arcan, i, type):
                 with open(pdf_path, "rb") as pdf_file:
+                    # print(f"TRY TO SEND :{pdf_path}")
                     new_filename = clean_filename(os.path.basename(pdf_path))
                     await context.bot.send_document(
                         chat_id=update.effective_chat.id,

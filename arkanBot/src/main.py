@@ -342,7 +342,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def send_file_to_all_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_ids = cursor.execute(
-        "SELECT chat_id FROM users WHERE file_sent = TRUE").fetchall()
+        "SELECT chat_id FROM users WHERE file_sent = FALSE").fetchall()
     for chat_id, in chat_ids:
         arcan = cursor.execute(
             "SELECT arcan FROM users WHERE chat_id = ?", (chat_id,)).fetchone()
