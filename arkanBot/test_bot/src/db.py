@@ -20,23 +20,23 @@ cursor.execute(
 """
 )
 
-# cursor.execute(
-# "ALTER TABLE users ADD COLUMN already_have_all_files TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN birth_date TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN like TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN discount_end TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN first_meet TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN file_sent BOOLEAN DEFAULT FALSE;")
-# cursor.execute(
-#     "ALTER TABLE users ADD COLUMN feedback_choice TEXT DEFAULT NULL;")
-# cursor.execute(
-# "ALTER TABLE users ADD COLUMN alredy_recive_one TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN march_send BOOLEAN DEFAULT FALSE")
-# cursor.execute("ALTER TABLE users ADD COLUMN march_sphere_chosen TEXT DEFAULT NULL")
-# cursor.execute("ALTER TABLE users ADD COLUMN march_send_all BOOLEAN DEFAULT FALSE")
-# cursor.execute("ALTER TABLE users ADD COLUMN no_friend BOOLEAN DEFAULT FALSE")
-# conn.commit()
+cursor.execute(
+"ALTER TABLE users ADD COLUMN already_have_all_files TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN birth_date TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN like TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN discount_end TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN first_meet TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN file_sent BOOLEAN DEFAULT FALSE;")
+cursor.execute(
+    "ALTER TABLE users ADD COLUMN feedback_choice TEXT DEFAULT NULL;")
+cursor.execute(
+"ALTER TABLE users ADD COLUMN alredy_recive_one TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN march_send BOOLEAN DEFAULT FALSE")
+cursor.execute("ALTER TABLE users ADD COLUMN march_sphere_chosen TEXT DEFAULT NULL")
+cursor.execute("ALTER TABLE users ADD COLUMN march_send_all BOOLEAN DEFAULT FALSE")
+cursor.execute("ALTER TABLE users ADD COLUMN no_friend BOOLEAN DEFAULT FALSE")
+conn.commit()
 
 # Создание таблицы для отслеживания переходов по реферальным ссылкам
 cursor.execute(
