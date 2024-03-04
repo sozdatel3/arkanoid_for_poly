@@ -35,7 +35,7 @@ from all_text import (
 from help import *
 from notify import *
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("TEST_TOKEN")
 
 
 def first_try_pars(message):
@@ -415,6 +415,16 @@ async def feedback_callback_handler(update: Update, context: ContextTypes.DEFAUL
     thank_you_text = "Благодарю тебя🤍\n\nЕсли остались дополнительные вопросы -- можешь писать мне в личные сообщения @polinaataroo\n\nТакже знай, что ты всегда можешь изменить свой выбор о частоте получаемых сообщений🤍"
     await context.bot.send_message(chat_id=user_id, text=thank_you_text)
 
+async def get_statistic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_user.id
+    if update.effective_user.id == 1358227914 or update.effective_user.id == 740905109:
+        with open(make_excel_file('../stat/'), "rb") as stat_file:
+                    await context.bot.send_document(
+                        chat_id=chat,
+                        document=InputFile(
+                            stat_file),
+                        caption="Спасибо, что пользуетесь кодом Ярослава 🤍\n\nЯ ценю твою поддержку.\n\nДержи новый файл с полезной информацией🤍",
+                    )
 
 async def send_file_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Проверка прав пользователя перед отправкой файла всем пользователям
@@ -433,6 +443,7 @@ if __name__ == "__main__":
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("sendfile", send_file_command))
     application.add_handler(CommandHandler("sendMarch", march_send))
+    application.add_handler(CommandHandler("getStat", get_statistic))
     application.add_handler(
         MessageHandler(filters.TEXT & (~filters.COMMAND), feedback_handler)
     )

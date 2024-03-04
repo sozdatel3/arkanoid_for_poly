@@ -37,16 +37,19 @@ async def march_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def ask_all_users_which_sphere(update: Update, context: ContextTypes.DEFAULT_TYPE, chat_ids):
     for chat_id, in chat_ids:
-        reply_markup = InlineKeyboardMarkup(keyboard_sphere_march)
-        await context.bot.send_message(
-            chat_id=chat_id,
-            # text="Привет, я приготовила для тебя личный прогноз на март, но немного опоздала\nКакая сфера тебя интересует?",
-            text=hi_march,
-            reply_markup = reply_markup
-        )
-        cursor.execute(
-            "UPDATE users SET march_send = ? WHERE chat_id = ?", (TRUE, chat_id)).fetchall()
-        conn.commit()
+        try:
+            reply_markup = InlineKeyboardMarkup(keyboard_sphere_march)
+            await context.bot.send_message(
+                chat_id=chat_id,
+                # text="Привет, я приготовила для тебя личный прогноз на март, но немного опоздала\nКакая сфера тебя интересует?",
+                text=hi_march,
+                reply_markup = reply_markup
+            )
+            cursor.execute(
+                "UPDATE users SET march_send = ? WHERE chat_id = ?", (TRUE, chat_id)).fetchall()
+            conn.commit()
+        except:
+            pass
     # pass
 
 async def choose_march_sphere(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -133,7 +136,8 @@ async def send_march_info(arcan, choice_march, context, user_id, caption):
         conn.commit()
 
 async def send_friend_ask(bot, user_id, context: ContextTypes.DEFAULT_TYPE,):
-    referral_link = f"https://t.me/polyArcanDevelopBot?start={user_id}_true"
+    # referral_link = f"https://t.me/polyArcanDevelopBot?start={user_id}_true"
+    referral_link = f"https://t.me/PolyArkanBot?start={user_id}_true"
     chat_id = user_id
     reply_markup = InlineKeyboardMarkup(keyboard_no_friend)
     await context.bot.send_message(

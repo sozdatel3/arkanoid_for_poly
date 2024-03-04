@@ -5,7 +5,7 @@ from glob import glob
 import os
 from telegram import Update
 import logging
-
+from db import make_excel_file
 #
 from dotenv import load_dotenv
 from telegram.ext import (
@@ -164,3 +164,4 @@ async def check_subscription(
     except Exception as e:
         print(f"Ошибка при проверке подписки: {e}")
     return False
+

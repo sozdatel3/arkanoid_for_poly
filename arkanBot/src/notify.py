@@ -61,7 +61,7 @@ async def notify_julik(context: ContextTypes.DEFAULT_TYPE):
 
 async def notify_gift(context: ContextTypes.DEFAULT_TYPE, nik, id):
     # user = update.message.from_user
-    notification_text = f"Этот пользователь получил подарок:\n\n {nik} id={id})\n"
+    notification_text = f"Этот пользователь получил подарок:\n\n @{nik} id={id})\n"
     await context.bot.send_message(chat_id=NOTIFICATION_CHAT_ID, text=notification_text)
 
 
